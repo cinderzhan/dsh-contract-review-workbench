@@ -21,7 +21,9 @@
 .dshContract .cr-document mark{cursor:pointer}
 .dshContract .cr-document mark.cr-focus{background:#f4c66a;color:#3d2d13;box-shadow:0 0 0 1px #d7a747}
 .dshContract .cr-issue-actions{display:flex;align-items:center;gap:5px;margin:12px 0}
-.dshContract .cr-status-button{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border:1px solid #bdcbc3;border-radius:6px;background:#fff;color:#54665d;font-size:17px;line-height:1;cursor:pointer}
+.dshContract .cr-status-button{position:relative;display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border:1px solid #bdcbc3;border-radius:6px;background:#fff;color:#54665d;font-size:17px;line-height:1;cursor:pointer}
+.dshContract .cr-status-button::after{content:attr(data-tooltip);position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);z-index:6;visibility:hidden;opacity:0;pointer-events:none;white-space:nowrap;padding:6px 9px;border-radius:5px;background:#22352e;color:#fff;font-size:12px;font-weight:500;line-height:1.3;box-shadow:0 3px 12px #17251e33}
+.dshContract .cr-status-button:hover::after,.dshContract .cr-status-button:focus-visible::after{visibility:visible;opacity:1}
 .dshContract .cr-status-button:hover:not(:disabled){background:#edf4ef;border-color:#7e9f8c}
 .dshContract .cr-status-button[aria-pressed=true]{background:#e4f1e9;border-color:#20725a;color:#145a46;box-shadow:inset 0 0 0 1px #20725a}
 .dshContract .cr-status-button.cr-status-ignored[aria-pressed=true]{background:#f2f3f2;border-color:#7d8982;color:#4e5a53;box-shadow:inset 0 0 0 1px #7d8982}

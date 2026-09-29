@@ -161,7 +161,7 @@ window.__ModuleLoader__.load({
       function issueStatusActions(item) {
         return h('div', { className: 'cr-issue-actions', role: 'group', 'aria-label': `${item.title}处理状态` },
           [['open', '○', '待处理'], ['confirmed', '✓', '确认需要修改'], ['ignored', '⊘', '忽略此项']].map(([status, icon, label]) =>
-            h('button', { key: status, type: 'button', className: `cr-status-button cr-status-${status}`, title: label, 'aria-label': `${item.title}：${label}`, 'aria-pressed': (item.status || 'open') === status, disabled: !active || !!busy, onClick: () => issueUpdate(item.id, { status }) }, h('span', { 'aria-hidden': true }, icon))))
+            h('button', { key: status, type: 'button', className: `cr-status-button cr-status-${status}`, 'data-tooltip': label, 'aria-label': `${item.title}：${label}`, 'aria-pressed': (item.status || 'open') === status, disabled: !active || !!busy, onClick: () => issueUpdate(item.id, { status }) }, h('span', { 'aria-hidden': true }, icon))))
       }
       function patchUpdate(id, status) { if (!active || busy) return; update({ patches: record.patches.map(p => p.id === id ? { ...p, status } : p) }) }
       function btn(label, action, primary = false, disabled = false, icon) { return h('button', { type: 'button', className: `cr-button${primary ? ' cr-primary' : ''}`, disabled: !active || disabled || !!busy, onClick: action }, icon && h(Icon, { kind: icon }), label) }
