@@ -6,4 +6,14 @@
 @media(prefers-reduced-motion:no-preference){.dshContract .cr-main{animation:cr-arrive .3s cubic-bezier(.16,1,.3,1)}@keyframes cr-arrive{from{opacity:.8;clip-path:inset(0 0 10px)}to{opacity:1;clip-path:inset(0)}}}
 .dshContract .cr-document mark.cr-added{background:#dcefdc;color:#234d30}.dshContract .cr-document mark.cr-removed{background:#f9e1d7;color:#7b3624;text-decoration:line-through}
 
-.dshContract .cr-model-setting{margin:20px 0;padding:16px 18px;border:1px solid var(--cr-line);border-radius:9px;background:#f8faf8}.dshContract .cr-model-setting label{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:650}.dshContract .cr-model-setting select{width:100%;max-width:100%;min-height:42px}.dshContract .cr-model-setting .cr-help{margin:9px 0;color:var(--cr-muted)}.dshContract .cr-model-setting .cr-button{margin-top:3px}
+
+/* Keep primary action labels legible against the accent in Desktop themes. */
+.dshContract button.cr-button.cr-primary,
+.dshContract button.cr-button.cr-primary:hover:not(:disabled),
+.dshContract button.cr-button.cr-primary:focus-visible,
+.dshContract button.cr-button.cr-primary:disabled{color:#fff!important}
+.dshContract button.cr-button.cr-primary *{color:inherit!important}
+.dshContract .cr-review-actions{display:flex;align-items:end;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.dshContract .cr-model-picker{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:11px;font-weight:600;color:var(--cr-muted)}
+.dshContract .cr-model-picker select{width:220px;max-width:min(48vw,220px);height:38px;min-height:38px;padding:6px 28px 6px 10px;font-size:12px;font-weight:500;background:#fff;color:var(--cr-ink);border:1px solid #b5c9bd;border-radius:7px}
+@media(max-width:740px){.dshContract .cr-review-actions{width:100%}.dshContract .cr-model-picker{flex:1}.dshContract .cr-model-picker select{width:100%;max-width:none}}
