@@ -23,11 +23,12 @@ test('single-file client registers one removable workbench provider', () => {
   let descriptor
   let panel
   let dispose
-  const style = { remove() {} }
+  const style = { dataset: {}, textContent: '', remove() {} }
+  let currentStyle
   const React = { createElement() {} }
   runInNewContext(client, {
     window: { __ModuleLoader__: { load(value) { declaration = value } } },
-    document: { createElement() { return style }, head: { append() {} } },
+    document: { querySelector() { return currentStyle }, createElement() { return style }, head: { append(node) { currentStyle = node } } },
     globalThis: {}, Date, Math, URL, Blob, setTimeout
   })
   assert.equal(declaration.id, manifest.name)

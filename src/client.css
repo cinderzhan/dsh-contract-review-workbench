@@ -29,3 +29,6 @@
 .dshContract .cr-status-button.cr-status-ignored[aria-pressed=true]{background:#f2f3f2;border-color:#7d8982;color:#4e5a53;box-shadow:inset 0 0 0 1px #7d8982}
 .dshContract .cr-status-button:focus-visible{outline:2px solid #20725a;outline-offset:2px}
 .dshContract .cr-status-button:disabled{opacity:.55;cursor:default}
+.dshContract .cr-project-folder{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;padding:15px 16px;border:1px solid var(--cr-line);border-radius:8px;background:#f4f8f3}
+.dshContract .cr-project-folder strong{font-size:13px}
+.dshContract .cr-project-folder p{flex:1 1 250px;font-size:12px;overflow-wrap:anywhere}

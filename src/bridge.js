@@ -3,13 +3,14 @@ export async function requestAI(service, action, payload, { signal, onSessionRea
   const active = () => service.state.active === OWNER && service.state.added.includes(OWNER)
   if (!active()) throw new Error('请先打开合同审核工作台。')
   signal?.throwIfAborted()
+  const chosen = payload.projectSessionId
+  if (!payload.projectFolderConfirmed || !chosen || !payload.sessionIds?.includes(chosen)) throw new Error('请先在上传合同页选择项目文件夹。')
   let sessionId = service.currentSession()
-  if (!sessionId || service.state.sessionBindings[sessionId] !== OWNER || !payload.sessionIds?.includes(sessionId) || (payload.otherSessionIds || []).includes(sessionId)) {
-    // A bare newSession() silently uses Desktop's default workspace, which may
-    // be the Harness installation folder. Let the user choose a folder instead.
-    sessionId = await service.newWorkspaceSession()
+  if (sessionId !== chosen || service.state.sessionBindings[sessionId] !== OWNER || (payload.otherSessionIds || []).includes(sessionId)) {
+    if (typeof service.ensureSession !== 'function') throw new Error('无法恢复项目会话，请重新打开项目。')
+    await service.ensureSession({ sessionId: chosen })
     signal?.throwIfAborted()
-    if (!sessionId) throw Object.assign(new Error('已取消选择资料位置。'), { name: 'AbortError' })
+    sessionId = service.currentSession()
   }
   const valid = () => active() && service.currentSession() === sessionId && service.state.sessionBindings[sessionId] === OWNER
   if (!valid()) throw new Error('会话已切换，请在当前合同工作台重新操作。')

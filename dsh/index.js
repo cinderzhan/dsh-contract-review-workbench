@@ -2,10 +2,12 @@ import Schema from '@deepseek-ai/schemastery'
 import { BlockAssembler, createUserMessage } from '@deepseek-ai/dsh-llm'
 import { ReviewError, readPayload, assertOwner, buildPrompt, normalizeOutput } from './ai.js'
 import { modelCatalog, resolveRoute } from './models.js'
+import { saveProject } from './project.js'
 export const name = 'dsh-contract-review-workbench'
-export const inject = ['connection', 'llm', 'agentDefaultModel', 'desktopWorkbenchOwnership']
+export const inject = ['connection', 'llm', 'agentDefaultModel', 'desktopWorkbenchOwnership', 'workspaceRegistry']
 export const Config = Schema.object({})
 export function apply(ctx) {
+  ctx.connection.fetch.register({ path: '/api/contract-review/project', methods: ['POST'], requestBody: 'buffered', fetch: request => saveProject(ctx, request) })
   ctx.connection.fetch.register({ path: '/api/contract-review/ai', methods: ['GET', 'POST'], requestBody: 'buffered', async fetch(request) {
     if (request.method === 'GET') {
       try { return Response.json(await modelCatalog(ctx), { headers: { 'cache-control': 'no-store' } }) }
