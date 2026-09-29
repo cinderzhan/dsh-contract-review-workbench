@@ -14,11 +14,11 @@ export const TEMPLATES = [
 ]
 const cloneRules = rules => rules.map(item => ({ ...item, keywords: item.keywords ? [...item.keywords] : undefined }))
 export function makeRecord(text = '', fileName = '未命名合同', oldRules) {
-  return { id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`, name: fileName.replace(/\.[^.]+$/, ''), sourceName: fileName, text, issues: [], patches: [], templateId: 'general', rules: cloneRules(oldRules?.length ? oldRules : TEMPLATES[0].rules), stance: 'neutral', instructions: '', reviewedAt: '', memo: '', stage: 1, sessionIds: [], createdAt: new Date().toISOString() }
+  return { id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`, name: fileName.replace(/\.[^.]+$/, ''), sourceName: fileName, text, issues: [], patches: [], templateId: 'general', rules: cloneRules(oldRules?.length ? oldRules : TEMPLATES[0].rules), stance: 'neutral', instructions: '', reviewedAt: '', memo: '', stage: 1, sessionIds: [], workspaceSessionId: '', createdAt: new Date().toISOString() }
 }
 export function normalizeRecord(record, legacyRules) {
   const base = makeRecord(record.text || '', record.sourceName || record.name || '历史合同')
-  return { ...base, ...record, rules: cloneRules(record.rules || legacyRules || base.rules).map(item => ({ ...item, enabled: item.enabled !== false })), issues: (record.issues || []).map((item, index) => ({ ...item, id: item.id || `issue-${index}`, quote: item.quote || item.excerpt || '', suggestion: item.suggestion || '', status: item.status || 'open', note: item.note || '' })), patches: record.patches || [], sessionIds: record.sessionIds || [], stage: record.stage ?? (record.reviewedAt ? 3 : 1), reviewKind: record.reviewKind || (record.reviewedAt ? 'basic' : '') }
+  return { ...base, ...record, rules: cloneRules(record.rules || legacyRules || base.rules).map(item => ({ ...item, enabled: item.enabled !== false })), issues: (record.issues || []).map((item, index) => ({ ...item, id: item.id || `issue-${index}`, quote: item.quote || item.excerpt || '', suggestion: item.suggestion || '', status: item.status || 'open', note: item.note || '' })), patches: record.patches || [], sessionIds: record.sessionIds || [], workspaceSessionId: record.workspaceSessionId || '', stage: record.stage ?? (record.reviewedAt ? 3 : 1), reviewKind: record.reviewKind || (record.reviewedAt ? 'basic' : '') }
 }
 export function validatePatches(text, patches) {
   if (typeof text !== 'string' || !Array.isArray(patches)) throw new Error('修订数据格式不正确，请重新生成。')

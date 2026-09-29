@@ -24,11 +24,13 @@ test('deletion and new missing clause insertion work', () => {
   assert.equal(applyPatches('abc', [{original:'',replacement:'新增条款',status:'accepted'}]), 'abc\n\n新增条款')
 })
 test('legacy contracts, findings and notes survive migration', () => {
-  const old = {id:'old',name:'采购',text:'正文',memo:'保留备注',reviewedAt:'昨天',issues:[{id:'x',excerpt:'原文',status:'confirmed',note:'人工判断'}]}
+  const old = {id:'old',name:'采购',text:'正文',memo:'保留备注',reviewedAt:'昨天',sessionIds:['harness-session'],issues:[{id:'x',excerpt:'原文',status:'confirmed',note:'人工判断'}]}
   const migrated = normalizeRecord(old)
   assert.equal(migrated.id, 'old'); assert.equal(migrated.memo, '保留备注')
   assert.equal(migrated.issues[0].note, '人工判断'); assert.equal(migrated.issues[0].quote, '原文')
   assert.equal(migrated.reviewKind, 'basic'); assert.equal(migrated.stage, 3)
+  assert.deepEqual(migrated.sessionIds, ['harness-session'])
+  assert.equal(migrated.workspaceSessionId, '')
 })
 test('rule edits do not mutate built-in templates or another document', () => {
   const first = makeRecord('A', 'A.txt'), second = makeRecord('B', 'B.txt')

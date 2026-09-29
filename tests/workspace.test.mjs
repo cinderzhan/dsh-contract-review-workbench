@@ -31,6 +31,13 @@ test('review reuses only the current session linked to this contract', async () 
   assert.deepEqual(calls, ['request'])
 })
 
+test('an older session still in document history does not bypass the chosen workspace session', async () => {
+  const { service, calls } = mockService({ current: 'default-session' })
+  const result = await requestAI(service, 'review', { sessionIds: ['chosen-session'], otherSessionIds: [] })
+  assert.equal(result.sessionId, 'chosen-session')
+  assert.deepEqual(calls, ['picker', 'request'])
+})
+
 test('canceling the directory picker sends no AI request and creates no implicit session', async () => {
   const { service, calls } = mockService({ chosen: null })
   await assert.rejects(requestAI(service, 'review', { sessionIds: [], otherSessionIds: [] }), { name: 'AbortError' })
