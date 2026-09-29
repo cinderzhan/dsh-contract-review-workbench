@@ -17,6 +17,13 @@ test('AI malformed output is failure, valid empty findings remain empty', () => 
   assert.deepEqual(normalizeOutput('{"issues":[]}', data()), { issues: [] })
   assert.throws(() => normalizeOutput(JSON.stringify({ issues: [{ title: 'x', severity: 'high', detail: 'x', quote: '捏造原文', suggestion: 'x' }] }), data()))
 })
+test('Model prose around JSON is accepted only when the embedded result passes validation', () => {
+  const valid = { issues: [{ title: '付款期限缺失', severity: 'medium', detail: '未写明付款期限。', quote: '甲方付款。', suggestion: '明确付款期限。' }] }
+  assert.equal(normalizeOutput(`审核如下：\n\`\`\`json\n${JSON.stringify(valid)}\n\`\`\`\n请人工复核。`, data()).issues[0].title, '付款期限缺失')
+  assert.throws(() => normalizeOutput('已审核，未发现问题。', data()), /未返回可解析的 JSON/)
+  assert.throws(() => normalizeOutput('', data()), /未返回审核正文/)
+  assert.throws(() => normalizeOutput('说明 {"issues":[{"title":"x","severity":"high","detail":"x","quote":"捏造原文","suggestion":"x"}]}', data()), /完整性检查/)
+})
 test('Revisions reject overlaps, ambiguous source and ignored issues; allow deletion and one append', () => {
   const d = { ...data(), action: 'revise', issues: [{ id: 'i1', title: 'x', status: 'open' }] }
   const p = { issueId: 'i1', original: '甲方付款。', replacement: '', reason: '删除' }

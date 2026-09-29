@@ -27,7 +27,14 @@ export function buildPrompt(data) {
 }
 export function normalizeOutput(raw, data) {
   let value
-  try { const text = raw.trim().replace(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/i, '$1'); value = JSON.parse(text) } catch { throw new ReviewError('AI 返回的结果格式无效，请重试。', 502) }
+  try { value = JSON.parse(raw.trim().replace(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/i, '$1')) }
+  catch {
+    // Some models add a short preface around the requested JSON. Only accept
+    // one complete object; the normal schema and contract-evidence checks below
+    // still apply. Never evaluate or expose the surrounding model text.
+    value = embeddedObject(raw)
+    if (value === undefined) throw new ReviewError(raw.trim() ? '模型未返回可解析的 JSON 审核结果。请更换审核模型，或缩短合同和规则后重试。' : '模型未返回审核正文。请更换审核模型后重试。', 502)
+  }
   const fail = () => { throw new ReviewError('AI 返回的结果未通过完整性检查，请重试。', 502) }
   if (data.action === 'review') {
     if (!value || !Array.isArray(value.issues) || value.issues.length > 100) fail()
@@ -44,6 +51,24 @@ export function normalizeOutput(raw, data) {
     else { const start = data.text.indexOf(p.original); const end = start + p.original.length; if (start < 0 || data.text.indexOf(p.original, start + 1) !== -1 || ranges.some(([a, b]) => start < b && end > a)) fail(); ranges.push([start, end]) }
     return { id: `patch-${n + 1}`, issueId: p.issueId, original: p.original, replacement: p.replacement, reason: p.reason, status: 'pending' }
   }) }
+}
+function embeddedObject(raw) {
+  let start = -1, depth = 0, quoted = false, escaped = false
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw[i]
+    if (start < 0) { if (char === '{') { start = i; depth = 1 } continue }
+    if (quoted) {
+      if (escaped) escaped = false
+      else if (char === '\\') escaped = true
+      else if (char === '"') quoted = false
+    } else if (char === '"') quoted = true
+    else if (char === '{') depth++
+    else if (char === '}' && --depth === 0) {
+      try { const value = JSON.parse(raw.slice(start, i + 1)); if (value && typeof value === 'object' && !Array.isArray(value)) return value } catch {}
+      start = -1
+    }
+  }
+  return undefined
 }
 export async function assertOwner(ctx, sessionId) {
   const state = await ctx.desktopWorkbenchOwnership.read()

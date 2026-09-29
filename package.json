@@ -1,6 +1,6 @@
 {
   "name": "dsh-contract-review-workbench",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "description": "Local DSH Desktop contract review, AI revision and side-by-side comparison",
   "license": "MIT",
