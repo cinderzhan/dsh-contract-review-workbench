@@ -36,7 +36,7 @@ test('Client rejects stale navigation and passes signal to host fetch', async ()
   let current = 's1'; const abort = new AbortController()
   const service = { state: { active: OWNER, added: [OWNER], sessionBindings: { s1: OWNER } }, currentSession: () => current,
     request: async (_path, options) => { assert.equal(options.signal, abort.signal); current = 's2'; return Response.json({ issues: [] }) } }
-  await assert.rejects(requestAI(service, 'review', data(), { signal: abort.signal }), /会话已切换/)
+  await assert.rejects(requestAI(service, 'review', { ...data(), sessionIds: ['s1'] }, { signal: abort.signal }), /会话已切换/)
 })
 test('Disabled rules excluded and all-disabled is an actionable error', () => {
   assert.throws(() => validatePayload({ ...data(), rules: [{ title: 'x', enabled: false }] }), /至少启用/)
@@ -45,19 +45,19 @@ test('Disabled rules excluded and all-disabled is an actionable error', () => {
 test('Bridge cancelled before invocation never creates a session', async () => {
   const controller = new AbortController(); controller.abort()
   let created = 0
-  const service = { state: { active: OWNER, added: [OWNER], sessionBindings: {} }, currentSession: () => null, newSession: async () => { created++; return 'new' } }
+  const service = { state: { active: OWNER, added: [OWNER], sessionBindings: {} }, currentSession: () => null, newWorkspaceSession: async () => { created++; return 'new' } }
   await assert.rejects(requestAI(service, 'review', data(), { signal: controller.signal }))
   assert.equal(created, 0)
 })
 test('Mode changed while creating session never sends model request', async () => {
   let calls = 0
-  const service = { state: { active: OWNER, added: [OWNER], sessionBindings: {} }, currentSession: () => 'new', newSession: async () => { service.state.active = null; service.state.sessionBindings.new = OWNER; return 'new' }, request: async () => { calls++ } }
+  const service = { state: { active: OWNER, added: [OWNER], sessionBindings: {} }, currentSession: () => 'new', newWorkspaceSession: async () => { service.state.active = null; service.state.sessionBindings.new = OWNER; return 'new' }, request: async () => { calls++ } }
   await assert.rejects(requestAI(service, 'review', data()), /会话已切换/)
   assert.equal(calls, 0)
 })
-test('Session mapped to another document forces new owned session; routing metadata excluded from prompt', async () => {
+test('Session mapped to another document forces a new directory choice; routing metadata excluded from prompt', async () => {
   let current = 'old', created = 0
-  const service = { state: { active: OWNER, added: [OWNER], sessionBindings: { old: OWNER } }, currentSession: () => current, newSession: async () => { created++; current = 'new'; service.state.sessionBindings.new = OWNER; return 'new' }, request: async (_path, options) => { assert.equal(JSON.parse(options.body).sessionId, 'new'); return Response.json({ issues: [] }) } }
+  const service = { state: { active: OWNER, added: [OWNER], sessionBindings: { old: OWNER } }, currentSession: () => current, newWorkspaceSession: async () => { created++; current = 'new'; service.state.sessionBindings.new = OWNER; return 'new' }, request: async (_path, options) => { assert.equal(JSON.parse(options.body).sessionId, 'new'); return Response.json({ issues: [] }) } }
   const payload = { ...data(), sessionIds: [], otherSessionIds: ['old'] }
   const result = await requestAI(service, 'review', payload)
   assert.equal(created, 1); assert.equal(result.sessionId, 'new')

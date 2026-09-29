@@ -1,16 +1,19 @@
 const OWNER = 'cinderzhan/dsh-contract-review-workbench'
-export async function requestAI(service, action, payload, { signal } = {}) {
+export async function requestAI(service, action, payload, { signal, onSessionReady } = {}) {
   const active = () => service.state.active === OWNER && service.state.added.includes(OWNER)
   if (!active()) throw new Error('请先打开合同审核工作台。')
   signal?.throwIfAborted()
   let sessionId = service.currentSession()
-  if (!sessionId || service.state.sessionBindings[sessionId] !== OWNER || (payload.otherSessionIds || []).includes(sessionId)) {
-    sessionId = await service.newSession()
+  if (!sessionId || service.state.sessionBindings[sessionId] !== OWNER || !payload.sessionIds?.includes(sessionId) || (payload.otherSessionIds || []).includes(sessionId)) {
+    // A bare newSession() silently uses Desktop's default workspace, which may
+    // be the Harness installation folder. Let the user choose a folder instead.
+    sessionId = await service.newWorkspaceSession()
     signal?.throwIfAborted()
-    if (!sessionId) throw new Error('未创建审核会话，操作已取消。')
+    if (!sessionId) throw Object.assign(new Error('已取消选择资料位置。'), { name: 'AbortError' })
   }
   const valid = () => active() && service.currentSession() === sessionId && service.state.sessionBindings[sessionId] === OWNER
   if (!valid()) throw new Error('会话已切换，请在当前合同工作台重新操作。')
+  onSessionReady?.(sessionId)
   const response = await service.request('/api/contract-review/ai', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...payload, action, sessionId }), signal })
   signal?.throwIfAborted()
   if (!valid()) throw new Error('会话已切换，已丢弃旧会话的审核结果。')
