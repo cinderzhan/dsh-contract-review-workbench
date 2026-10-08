@@ -65,7 +65,7 @@ window.__ModuleLoader__.load({
     function BusinessPanel(props) {
       const { service, active = true } = props
       // Desktop may rebuild the document head without remounting this panel.
-      React.useLayoutEffect(ensureStyles)
+      React.useLayoutEffect(() => { ensureStyles() })
       React.useSyncExternalStore(service.subscribe, service.getSnapshot)
       const sessionList = service.ctx?.sessions?.list
       React.useSyncExternalStore(React.useCallback(listener => sessionList?.subscribe?.(listener) || (() => {}), [sessionList]), React.useCallback(() => service.currentSession?.() || '', [service]), React.useCallback(() => '', []))
