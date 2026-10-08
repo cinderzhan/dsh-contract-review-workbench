@@ -25,7 +25,16 @@ test('single-file client registers one removable workbench provider', () => {
   let dispose
   const style = { dataset: {}, textContent: '', remove() {} }
   let currentStyle
-  const React = { createElement() {} }
+  const layoutCleanups = []
+  const React = {
+    createElement() {},
+    useLayoutEffect(effect) { layoutCleanups.push(effect()) },
+    useSyncExternalStore() {},
+    useCallback(callback) { return callback },
+    useState(initial) { return [initial, () => {}] },
+    useRef(initial) { return { current: initial } },
+    useEffect() {}
+  }
   runInNewContext(client, {
     window: { __ModuleLoader__: { load(value) { declaration = value } } },
     document: { querySelector() { return currentStyle }, createElement() { return style }, head: { append(node) { currentStyle = node } } },
@@ -43,6 +52,9 @@ test('single-file client registers one removable workbench provider', () => {
   assert.equal(descriptor.customFrame, true)
   assert.match(descriptor.repository, /^https:\/\/github\.com\/[^/]+\/[^/]+$/)
   assert.equal(typeof panel, 'function')
+  panel({ service: { subscribe() {}, getSnapshot() {}, currentSession() { return '' } } })
+  assert.equal(currentStyle, style)
+  assert.deepEqual(layoutCleanups, [undefined], 'React layout effects must not return a style element as cleanup')
   dispose()
   assert.equal(descriptor, null)
 })
